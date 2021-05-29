@@ -15,4 +15,4 @@
 >    txSetColor (colorBorder, borderSize);
 >    txSetFillColor (RGB(0, 80, 0));
 >    txRectangle (0 + indent, 0 + indent, 1200 - indent, 700 - indent);
->    }
+>    }![project2-1](https://user-images.githubusercontent.com/80356955/120077926-eba8eb00-c0bd-11eb-9b9f-2f176cb585dc.png)
