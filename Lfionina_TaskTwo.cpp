@@ -58,9 +58,8 @@ void MoveBall (int indent,  int borderSize,
 
     while (! txGetAsyncKeyState (VK_ESCAPE))
         {
-        Ball (xBall_1, yBall_1, 20, "1", 10, x+20, 10);
-        Ball (xBall_2, yBall_2, 30, "2", y+20, 10, y+20);
-        printf("x= %d  y= %d\n", x, y);
+        Ball (xBall_1, yBall_1, 20, "1",     10, x + 20, 10);
+        Ball (xBall_2, yBall_2, 30, "2", y + 20, 10,     y + 30);
 
         xBall_1 += vxBall_1 * dtBall_1;
         yBall_1 += vyBall_1 * dtBall_1;
@@ -132,6 +131,13 @@ void MoveBall (int indent,  int borderSize,
 
             }
 
+        //---- управление cкоростью 1 шарика----
+        if (txGetAsyncKeyState (VK_RIGHT)) dtBall_1++;
+        if (txGetAsyncKeyState (VK_LEFT))  dtBall_1--;
+
+        //---- управление cкоростью 2 шарика----
+        if (txGetAsyncKeyState (VK_LCONTROL))    dtBall_2--;
+        if (txGetAsyncKeyState (VK_LSHIFT))    dtBall_2++;
 
         txSleep(100);
         Field (indent, borderSize, TX_ORANGE);
