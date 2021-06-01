@@ -31,7 +31,19 @@ int main ()
     return 0;
     }
 
-//-----------------------------------------------------------------------------
+//{-----------------------------------------------------------------------------
+//!   Функция рисования бильярдного поля
+//!
+//!@param indent        - отступ от края окна
+//!@param borderSize    - ширина бортика прямоугольного поля
+//!@param colorBorder   - цвет бортика прямоугольного поля
+//!
+//!@par  Пример использования:
+//!@code
+//!         Field (50, 15, TX_ORANGE);
+//!@endcode
+//}-----------------------------------------------------------------------------
+
 void Field (int indent, int borderSize, COLORREF colorBorder)
     {
     txSetFillColor (TX_WHITE);
@@ -116,7 +128,7 @@ void MoveBall (int indent,  int borderSize,
             yBall_2  = 0 + allIndentBall_2;
             }
 
-        //----------------
+        //-----------столкновение-----
         int dR = (xBall_2 - xBall_1)*(xBall_2 - xBall_1) + (yBall_2 - yBall_1)*(yBall_2 - yBall_1);
 
         if (dR <= 50*50)
@@ -136,14 +148,15 @@ void MoveBall (int indent,  int borderSize,
         if (txGetAsyncKeyState (VK_LEFT))  dtBall_1--;
 
         //---- управление cкоростью 2 шарика----
-        if (txGetAsyncKeyState (VK_LCONTROL))    dtBall_2--;
-        if (txGetAsyncKeyState (VK_LSHIFT))    dtBall_2++;
+        if (txGetAsyncKeyState ('A'))    dtBall_2--;
+        if (txGetAsyncKeyState ('D'))    dtBall_2++;
 
         txSleep(100);
         Field (indent, borderSize, TX_ORANGE);
         }
 
     }
+
 //-----------------------------------------------------------------------------
 void Ball (int x, int y, int radius, const char text[], int Red, int Green, int Blue)
     {
