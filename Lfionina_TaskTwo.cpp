@@ -11,12 +11,18 @@
 # include <stdlib.h>
 
 void Field (int indent, int borderSize, COLORREF colorBorder);
+
 void MoveBall (int indent,  int borderSize,
                int x = 300, int y = 100,
                int vx = 9,  int vy = 3,
                int dt = 2);
-void Ball (int x, int y, int radius, const char text[],int Red = 0, int Green = 0, int Blue = 0);
 
+void BallDraw (int x, int y, int radius, const char text[],int Red = 0, int Green = 0, int Blue = 0);
+
+void PhysicsBall (int* xBall, int* yBall, int* vxBall, int* vyBall, int dtBall, int allIndentBall);
+
+void ControlBallOne (int* dtBall_1);
+void ControlBallTwo (int* dtBall);
 
 //===========================================================================
 int main ()
@@ -56,77 +62,25 @@ void Field (int indent, int borderSize, COLORREF colorBorder)
     }
 
 //-----------------------------------------------------------------------------
-void MoveBall (int indent,  int borderSize,
-               int  x,  int  y,
-               int vx,  int vy,
-               int dt)
+void MoveBall (int indent,  int borderSize, int x, int y, int vx,  int vy, int dt)
     {
 
     int allIndentBall_1 = indent + borderSize + 16;
     int allIndentBall_2 = indent + borderSize + 21;
 
-    int xBall_1  = x,        yBall_1  = y,       dtBall_1 = dt + 5, vxBall_1 =  vx, vyBall_1 =  vy;
-    int xBall_2  = x + 600,  yBall_2  = y + 650, dtBall_2 = dt,     vxBall_2 = -vx, vyBall_2 =  -vy;
+    int xBall_1  = x,       yBall_1  = y,       dtBall_1 = dt + 5, vxBall_1 =  vx, vyBall_1 =  vy;
+    int xBall_2  = x + 600, yBall_2  = y + 650, dtBall_2 = dt,     vxBall_2 = -vx, vyBall_2 = -vy;
+
+    int Red   = rand() % 255, Green = rand() % 255, Blue  = rand() % 255;
+
 
     while (! txGetAsyncKeyState (VK_ESCAPE))
         {
-        Ball (xBall_1, yBall_1, 20, "1",     10, x + 20, 10);
-        Ball (xBall_2, yBall_2, 30, "2", y + 20, 10,     y + 30);
+        BallDraw (xBall_1, yBall_1, 20, "1", Red, Green, Blue);
+        BallDraw (xBall_2, yBall_2, 30, "2", Blue, Green, Red);
 
-        xBall_1 += vxBall_1 * dtBall_1;
-        yBall_1 += vyBall_1 * dtBall_1;
-
-        xBall_2 += vxBall_2 * dtBall_2;
-        yBall_2 += vyBall_2 * dtBall_2;
-
-        if (xBall_1 > 1200 - allIndentBall_1)
-            {
-            vxBall_1 = -vxBall_1;
-            xBall_1  = 1200 - allIndentBall_1;
-            }
-
-        if (yBall_1 >  700 - allIndentBall_1)
-            {
-            vyBall_1 = -vyBall_1;
-            yBall_1  = 700 - allIndentBall_1;
-            }
-
-        if (xBall_1 <  0 + allIndentBall_1)
-            {
-            vxBall_1 = -vxBall_1;
-            xBall_1  = 0 + allIndentBall_1;
-            }
-
-        if (yBall_1 <  0 + allIndentBall_1)
-            {
-            vyBall_1 = -vyBall_1;
-            yBall_1  = 0 + allIndentBall_1;
-            }
-
-        //----------------
-        if (xBall_2 > 1200 - allIndentBall_2)
-            {
-            vxBall_2 = -vxBall_2;
-            xBall_2  = 1200 - allIndentBall_2;
-            }
-
-        if (yBall_2 >  700 - allIndentBall_2)
-            {
-            vyBall_2 = -vyBall_2;
-            yBall_2  = 700 - allIndentBall_2;
-            }
-
-        if (xBall_2 <  0 + allIndentBall_2)
-            {
-            vxBall_2 = -vxBall_2;
-            xBall_2  = 0 + allIndentBall_2;
-            }
-
-        if (yBall_2 <  0 + allIndentBall_2)
-            {
-            vyBall_2 = -vyBall_2;
-            yBall_2  = 0 + allIndentBall_2;
-            }
+        PhysicsBall (&xBall_1, &yBall_1, &vxBall_1, &vyBall_1, dtBall_1, allIndentBall_1);
+        PhysicsBall (&xBall_2, &yBall_2, &vxBall_2, &vyBall_2, dtBall_2, allIndentBall_2);
 
         //-----------столкновение-----
         int dR = (xBall_2 - xBall_1)*(xBall_2 - xBall_1) + (yBall_2 - yBall_1)*(yBall_2 - yBall_1);
@@ -135,30 +89,42 @@ void MoveBall (int indent,  int borderSize,
             {
             vxBall_1 = -vxBall_1;
             vyBall_1 = -vyBall_1;
-            x += 10;
 
             vxBall_2 = -vxBall_2;
             vyBall_2 = -vyBall_2;
-            y += 20;
+
+            Red   = rand() % 255;
+            Green = rand() % 255;
+            Blue  = rand() % 255;
 
             }
 
-        //---- управление cкоростью 1 шарика----
-        if (txGetAsyncKeyState (VK_RIGHT)) dtBall_1++;
-        if (txGetAsyncKeyState (VK_LEFT))  dtBall_1--;
-
-        //---- управление cкоростью 2 шарика----
-        if (txGetAsyncKeyState ('A'))    dtBall_2--;
-        if (txGetAsyncKeyState ('D'))    dtBall_2++;
+   //     ControlBallOne (&dtBall_1);
+        ControlBallTwo (&dtBall_2);
 
         txSleep(100);
         Field (indent, borderSize, TX_ORANGE);
         }
 
     }
+//-----------------------------------------------------------------------------
+void ControlBallTwo (int* dtBall)
+    {
+    //---- управление cкоростью 2 шарика----
+    if (txGetAsyncKeyState ('A')) (*dtBall)++;
+    if (txGetAsyncKeyState ('D')) (*dtBall)--;
+    }
 
 //-----------------------------------------------------------------------------
-void Ball (int x, int y, int radius, const char text[], int Red, int Green, int Blue)
+/*void ControlBallOne (int* dtBall)
+    {
+    //---- управление cкоростью 1 шарика----
+    if (txGetAsyncKeyState (VK_RIGHT)) (*dtBall)++;
+    if (txGetAsyncKeyState (VK_LEFT))  (*dtBall)--;
+    }
+*/
+//-----------------------------------------------------------------------------
+void BallDraw (int x, int y, int radius, const char text[], int Red, int Green, int Blue)
     {
     txSetColor (TX_LIGHTGREEN, 2);
     txSetFillColor (RGB(255 - Red, 255 - Green, 255 - Blue));
@@ -167,4 +133,35 @@ void Ball (int x, int y, int radius, const char text[], int Red, int Green, int 
     txSelectFont ("Arial", radius, radius/4*3, true);
     txSetColor (TX_BLACK);
     txTextOut (x-radius/2, y-radius/2, text);
+    }
+
+//-----------------------------------------------------------------------------
+void PhysicsBall (int* xBall, int* yBall, int* vxBall, int* vyBall, int dtBall, int allIndentBall)
+    {
+    *xBall = *xBall + (*vxBall) * dtBall;
+    *yBall = *yBall + (*vyBall) * dtBall;
+
+    if (*xBall > 1200 - allIndentBall)
+        {
+        *vxBall = -(*vxBall);
+        *xBall  = 1200 - allIndentBall;
+        }
+
+    if (*yBall >  700 - allIndentBall)
+        {
+        *vyBall = -(*vyBall);
+        *yBall  = 700 - allIndentBall;
+        }
+
+    if (*xBall <  0 + allIndentBall)
+        {
+        *vxBall = -(*vxBall);
+        *xBall  = 0 + allIndentBall;
+        }
+
+    if (*yBall <  0 + allIndentBall)
+        {
+        *vyBall = -(*vyBall);
+        *yBall  = 0 + allIndentBall;
+        }
     }
