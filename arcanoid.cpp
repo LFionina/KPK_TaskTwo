@@ -100,7 +100,6 @@ void MoveBall ()
 
         Draw_Ball  (xBall_1, yBall_1, 10, TX_BLUE);
 
-
         PhysicsBall (&xBall_1, &yBall_1, &vxBall_1, &vyBall_1, dtBall_1, &xTruck, &widthX, &score);
 
         ControlTruck (&xTruck, &widthX);
@@ -162,18 +161,21 @@ void PhysicsBall (double*  xBall, double*  yBall,
         {
         *vxBall = -(*vxBall);
         *xBall  = txGetExtentX() - 10;
+        txPlaySound ("Sounds/ball1.wav");
         }
 
     if (*xBall < 10)
         {
         *vxBall = -(*vxBall);
         *xBall  = 10;
+        txPlaySound ("Sounds/ball1.wav");
         }
 
     if (*yBall < 120)
         {
         *vyBall = -(*vyBall);
         *yBall  = 120;
+        txPlaySound ("Sounds/ball1.wav");
         }
 
     if (*yBall >  txGetExtentY() - 80 - 20)
@@ -187,6 +189,7 @@ void PhysicsBall (double*  xBall, double*  yBall,
                     *vxBall = *vxBall + 0.1;
                     *yBall  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
+                    txPlaySound ("Sounds/ball1.wav");
                     }
                 else
                     {
@@ -194,11 +197,13 @@ void PhysicsBall (double*  xBall, double*  yBall,
                     *vxBall = *vxBall - 0.1;
                     *yBall  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
+                    txPlaySound ("Sounds/ball1.wav");
                     }
                 break;
 
             case false:
                 *yBall  = 1000;
+                 txPlaySound ("Sounds/gameOver.wav");
                 break;
 
             default:
