@@ -10,64 +10,53 @@
 # include "TXLib.h"
 # include <stdlib.h>
 
-void Draw_Field ();
-void Draw_Truck (double x, double widthX);
-void Draw_Ball  (double x, double y, int radius, COLORREF color);
+# include "ArcanoidSDK\ArcanoidLib.h"
 
+struct Ball
+    {
+    double x, y;
+    int radius ;
+    COLORREF color;
+    };
+
+void Draw_Ball  (Ball proba);
 void ControlTruck (double* xTruck, double* widthX);
 void MoveBall ();
 
-void PhysicsBall (double*  xBall, double*  yBall,
+void PhysicsBall (Ball* proba,
                   double* vxBall, double* vyBall,
                   int dtBall,
                   double* xTruck, double* widthX,
                   int* score);
 
 void TabloScore (int* score);
-void TabloBottom ();
+
+
 
 //-----------------------------------------------------------------------------
 int main ()
     {
     txCreateWindow (500, 700);
 
-    Draw_Field ();
+    DrawField ();
 
     MoveBall ();
     return 0;
     }
 
 
-
-
 //------------------- Ф У Н К Ц И И     Р И С О В А Н И Я ---------------------
-//-----------------------------------------------------------------------------
-void Draw_Field ()
-    {
-    txSetFillColor (TX_WHITE);
-    txClear();
 
-    txSetColor     (RGB(153, 102, 255));
-    txSetFillColor (RGB(153, 102, 255));
-    txRectangle (0,                   0, txGetExtentX(),           100);
-    txRectangle (0, txGetExtentY() - 80, txGetExtentX(), txGetExtentY());
-    }
 
 //-----------------------------------------------------------------------------
-void Draw_Truck (double x, double widthX)
+void Draw_Ball (Ball proba)
     {
-    txSetColor     (RGB(10, 150, 10));
-    txSetFillColor (RGB( 0, 204,  0));
-    txRectangle (x, txGetExtentY() - 80 - 20, x + widthX, txGetExtentY() - 80 - 5);
+    txSetColor (proba.color);
+    txSetFillColor (proba.color);
+    txCircle (proba.x, proba.y - proba.radius, proba.radius);
     }
 
-//-----------------------------------------------------------------------------
-void Draw_Ball (double x, double y, int radius, COLORREF color)
-    {
-    txSetColor (color);
-    txSetFillColor (color);
-    txCircle (x, y - radius, radius);
-    }
+
 
 //------------------- Ф У Н К Ц И И     У П Р А В Л Е Н И Я -------------------
 //-----------------------------------------------------------------------------
@@ -77,7 +66,7 @@ void ControlTruck (double* xTruck, double* widthX)
     if (txGetAsyncKeyState (VK_RIGHT) and *xTruck + *widthX < txGetExtentX ()) (*xTruck) += 5;
     if (txGetAsyncKeyState (VK_LEFT)  and *xTruck > 0                        ) (*xTruck) -= 5;
     if (txGetAsyncKeyState (VK_UP)                                           ) (*widthX) += 10;
-    if (txGetAsyncKeyState (VK_DOWN)                                       ) (*widthX) -= 10;
+    if (txGetAsyncKeyState (VK_DOWN)                                         ) (*widthX) -= 10;
     }
 
 
@@ -89,23 +78,24 @@ void MoveBall ()
     double xTruck = 0;
     double widthX = txGetExtentX ()*0.25 + 20;
 
-    double  xBall_1 = 100,  yBall_1 = 600,
-           vxBall_1 =   1, vyBall_1 =   1, dtBall_1 = 10;
+    double  vxBall_1 =   1, vyBall_1 =   1, dtBall_1 = 10;
+
+    Ball proba = {100, 600, 10, TX_BLUE};
 
     int score = 0;
 
-    while (yBall_1 < 999)
+    while (proba.y < 999)
         {
-        Draw_Truck (xTruck, widthX);
+        DrawTruck (xTruck, widthX);
 
-        Draw_Ball  (xBall_1, yBall_1, 10, TX_BLUE);
+        Draw_Ball (proba);
 
-        PhysicsBall (&xBall_1, &yBall_1, &vxBall_1, &vyBall_1, dtBall_1, &xTruck, &widthX, &score);
+        PhysicsBall (&proba, &vxBall_1, &vyBall_1, dtBall_1, &xTruck, &widthX, &score);
 
         ControlTruck (&xTruck, &widthX);
 
         txSleep(20);
-        Draw_Field ();
+        DrawField ();
 
         TabloScore (&score);
         TabloBottom ();
@@ -132,62 +122,48 @@ void TabloScore (int* score)
     txTextOut (150, 25, strScore);
     }
 
-//-----------------------------------------------------------------------------
-void TabloBottom ()
-    {
-    txSetColor(TX_WHITE);
-    txSelectFont ("Arial Black", 30);
-    txTextOut (50, 640, "<=  влево");
-    txTextOut (350, 640, "вправо  =>");
-    txTextOut (215, 640, "ширина");
-
-    txSelectFont ("Arial Black", 20);
-    txTextOut (235, 625, "вверх +");
-    txTextOut (235, 665, "вниз  -");
-
-    }
 
 //-----------------------------------------------------------------------------
-void PhysicsBall (double*  xBall, double*  yBall,
+void PhysicsBall (Ball* proba,
                   double* vxBall, double* vyBall,
                   int dtBall,
                   double* xTruck, double *widthX,
                   int* score)
     {
-    *xBall = *xBall + (*vxBall) * dtBall;
-    *yBall = *yBall + (*vyBall) * dtBall;
+    proba->x = proba->x + (*vxBall) * dtBall;
+    proba->y = proba->y + (*vyBall) * dtBall;
 
-    if (*xBall > txGetExtentX() - 10)
+    if (proba->x > txGetExtentX() - 10)
         {
         *vxBall = -(*vxBall);
-        *xBall  = txGetExtentX() - 10;
+        proba->x  = txGetExtentX() - 10;
         txPlaySound ("Sounds/ball1.wav");
         }
 
-    if (*xBall < 10)
+    if (proba->x < 10)
         {
         *vxBall = -(*vxBall);
-        *xBall  = 10;
+        proba->x  = 10;
         txPlaySound ("Sounds/ball1.wav");
         }
 
-    if (*yBall < 120)
+    if (proba->y < 120)
         {
         *vyBall = -(*vyBall);
-        *yBall  = 120;
+        proba->y  = 120;
         txPlaySound ("Sounds/ball1.wav");
         }
 
-    if (*yBall >  txGetExtentY() - 80 - 20)
+    if (proba->y >  txGetExtentY() - 80 - 20)
         {
-        switch (*xBall > *xTruck && *xBall < *xTruck + *widthX)
+        switch (proba->x > *xTruck && proba->x < *xTruck + *widthX)
             {
             case true:
-                if (*xBall < *xTruck + *widthX/2)
+                if (proba->x < *xTruck + *widthX/2)
                     {
                     *vyBall = -(*vyBall);
                     *vxBall = *vxBall + 0.1;
-                    *yBall  = txGetExtentY() - 80 - 20;
+                    proba->y  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
                     txPlaySound ("Sounds/ball1.wav");
                     }
@@ -195,15 +171,15 @@ void PhysicsBall (double*  xBall, double*  yBall,
                     {
                     *vyBall = -(*vyBall);
                     *vxBall = *vxBall - 0.1;
-                    *yBall  = txGetExtentY() - 80 - 20;
+                    proba->y  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
                     txPlaySound ("Sounds/ball1.wav");
                     }
                 break;
 
             case false:
-                *yBall  = 1000;
-                 txPlaySound ("Sounds/gameOver.wav");
+                proba->y  = 1000;
+                txPlaySound ("Sounds/gameOver.wav");
                 break;
 
             default:
