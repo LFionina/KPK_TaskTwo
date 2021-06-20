@@ -17,9 +17,11 @@ struct Ball
     double x, y;
     int radius ;
     COLORREF color;
+
+    void Draw ();
     };
 
-void Draw_Ball  (Ball proba);
+
 void ControlTruck (double* xTruck, double* widthX);
 void MoveBall ();
 
@@ -49,13 +51,12 @@ int main ()
 
 
 //-----------------------------------------------------------------------------
-void Draw_Ball (Ball proba)
+void Ball::Draw ()
     {
-    txSetColor (proba.color);
-    txSetFillColor (proba.color);
-    txCircle (proba.x, proba.y - proba.radius, proba.radius);
+    txSetColor (color);
+    txSetFillColor (color);
+    txCircle (x, y - radius, radius);
     }
-
 
 
 //------------------- Ô Ó Í Ê Ö È È     Ó Ï Ð À Â Ë Å Í È ß -------------------
@@ -74,11 +75,10 @@ void ControlTruck (double* xTruck, double* widthX)
 //-----------------------------------------------------------------------------
 void MoveBall ()
     {
-
     double xTruck = 0;
     double widthX = txGetExtentX ()*0.25 + 20;
 
-    double  vxBall_1 =   1, vyBall_1 =   1, dtBall_1 = 10;
+    double vxBall_1 = 1, vyBall_1 = 1, dtBall_1 = 10;
 
     Ball proba = {100, 600, 10, TX_BLUE};
 
@@ -88,7 +88,7 @@ void MoveBall ()
         {
         DrawTruck (xTruck, widthX);
 
-        Draw_Ball (proba);
+        proba.Draw ();
 
         PhysicsBall (&proba, &vxBall_1, &vyBall_1, dtBall_1, &xTruck, &widthX, &score);
 
