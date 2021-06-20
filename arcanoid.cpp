@@ -16,20 +16,58 @@ struct Ball
     {
     double x, y;
     int radius ;
+
     COLORREF color;
+
+    int vx, vy, dt;
 
     void Draw ();
     };
 
+struct Truck
+    {
+    double x;
+    double widthX;
 
-void ControlTruck (double* xTruck, double* widthX);
+    COLORREF color;
+
+    void Draw ();
+    void Control ();
+    };
+
+//-------------------   Ф У Н К Ц И И    К Л А С С О В    ---------------------
+
+//- - - - - - - - - - - - рисование шарика  - - - - - - - - - - - - - - - - - -
+void Ball::Draw ()
+    {
+    txSetColor     (color);
+    txSetFillColor (color);
+    txCircle (x, y - radius, radius);
+    }
+
+//- - - - - - - - - - - - рисование тележки - - - - - - - - - - - - - - - - - -
+void Truck::Draw ()
+    {
+    txSetColor     (color);
+    txSetFillColor (color);
+    txRectangle (x, txGetExtentY() - 80 - 20, x + widthX, txGetExtentY() - 80 - 5);
+    }
+
+//- - - - - - - - - - - - управление тележкой - - - - - - - - - - - - - - - - -
+void Truck::Control ()
+    {
+    if (txGetAsyncKeyState (VK_RIGHT) and (*this).x + (*this).widthX < txGetExtentX ()) (*this).x += 5;
+    if (txGetAsyncKeyState (VK_LEFT ) and (*this).x > 0                               ) (*this).x -= 5;
+    if (txGetAsyncKeyState (VK_UP   )                                                 ) (*this).widthX += 10;
+    if (txGetAsyncKeyState (VK_DOWN )                                                 ) (*this).widthX -= 10;
+    }
+
+
 void MoveBall ();
 
-void PhysicsBall (Ball* proba,
-                  double* vxBall, double* vyBall,
-                  int dtBall,
-                  double* xTruck, double* widthX,
-                  int* score);
+void PhysicsBall  (Ball* proba);
+void PhysicsTruck (Truck* truckOne,
+                   int* score);
 
 void TabloScore (int* score);
 
@@ -47,52 +85,23 @@ int main ()
     }
 
 
-//------------------- Ф У Н К Ц И И     Р И С О В А Н И Я ---------------------
-
-
-//-----------------------------------------------------------------------------
-void Ball::Draw ()
-    {
-    txSetColor (color);
-    txSetFillColor (color);
-    txCircle (x, y - radius, radius);
-    }
-
-
-//------------------- Ф У Н К Ц И И     У П Р А В Л Е Н И Я -------------------
-//-----------------------------------------------------------------------------
-void ControlTruck (double* xTruck, double* widthX)
-    {
-    //---- управление cкоростью 1 шарика----
-    if (txGetAsyncKeyState (VK_RIGHT) and *xTruck + *widthX < txGetExtentX ()) (*xTruck) += 5;
-    if (txGetAsyncKeyState (VK_LEFT)  and *xTruck > 0                        ) (*xTruck) -= 5;
-    if (txGetAsyncKeyState (VK_UP)                                           ) (*widthX) += 10;
-    if (txGetAsyncKeyState (VK_DOWN)                                         ) (*widthX) -= 10;
-    }
-
-
 //------------------- Ф У Н К Ц И Я      И Г Р ы ------------------------------
 //-----------------------------------------------------------------------------
 void MoveBall ()
     {
-    double xTruck = 0;
-    double widthX = txGetExtentX ()*0.25 + 20;
-
-    double vxBall_1 = 1, vyBall_1 = 1, dtBall_1 = 10;
-
-    Ball proba = {100, 600, 10, TX_BLUE};
+    Truck truckOne = {0, txGetExtentX ()*0.25 + 20, RGB( 0, 204, 0)};
+    Ball proba = {100, 600, 10, TX_BLUE, 1, 1, 10};
 
     int score = 0;
 
     while (proba.y < 999)
         {
-        DrawTruck (xTruck, widthX);
-
         proba.Draw ();
+        truckOne.Draw ();
 
-        PhysicsBall (&proba, &vxBall_1, &vyBall_1, dtBall_1, &xTruck, &widthX, &score);
+        PhysicsBall (&proba);
 
-        ControlTruck (&xTruck, &widthX);
+        truckOne.Control ();
 
         txSleep(20);
         DrawField ();
@@ -124,37 +133,40 @@ void TabloScore (int* score)
 
 
 //-----------------------------------------------------------------------------
-void PhysicsBall (Ball* proba,
-                  double* vxBall, double* vyBall,
-                  int dtBall,
-                  double* xTruck, double *widthX,
-                  int* score)
+void PhysicsBall (Ball* proba)
     {
-    proba->x = proba->x + (*vxBall) * dtBall;
-    proba->y = proba->y + (*vyBall) * dtBall;
+    proba->x = proba->x + proba->vx * proba->dt;
+    proba->y = proba->y + proba->vy * proba->dt;
 
     if (proba->x > txGetExtentX() - 10)
         {
-        *vxBall = -(*vxBall);
+        proba->vx = -(proba->vx);
         proba->x  = txGetExtentX() - 10;
         txPlaySound ("Sounds/ball1.wav");
         }
 
     if (proba->x < 10)
         {
-        *vxBall = -(*vxBall);
+        proba->vx = -(proba->vx);
         proba->x  = 10;
         txPlaySound ("Sounds/ball1.wav");
         }
 
     if (proba->y < 120)
         {
-        *vyBall = -(*vyBall);
+        proba->vy = -(proba->vy);
         proba->y  = 120;
         txPlaySound ("Sounds/ball1.wav");
         }
 
     if (proba->y >  txGetExtentY() - 80 - 20)
+        {
+        proba->vy = -(proba->vy);
+        proba->y  = txGetExtentY() - 80 - 20;
+        txPlaySound ("Sounds/ball1.wav");
+        }
+
+    /*if (proba->y >  txGetExtentY() - 80 - 20)
         {
         switch (proba->x > *xTruck && proba->x < *xTruck + *widthX)
             {
@@ -186,5 +198,5 @@ void PhysicsBall (Ball* proba,
                 break;
             }
 
-        }
+        } */
     }
