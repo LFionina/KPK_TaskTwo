@@ -19,7 +19,7 @@ struct Ball
 
     COLORREF color;
 
-    int vx, vy, dt;
+    double vx, vy, dt;
 
     void Draw ();
     };
@@ -65,8 +65,7 @@ void Truck::Control ()
 
 void MoveBall ();
 
-void PhysicsBall  (Ball* proba);
-void PhysicsTruck (Truck* truckOne,
+void PhysicsBall  (Ball* proba, double x, double widthX,
                    int* score);
 
 void TabloScore (int* score);
@@ -99,7 +98,7 @@ void MoveBall ()
         proba.Draw ();
         truckOne.Draw ();
 
-        PhysicsBall (&proba);
+        PhysicsBall (&proba, truckOne.x, truckOne.widthX, &score);
 
         truckOne.Control ();
 
@@ -133,7 +132,7 @@ void TabloScore (int* score)
 
 
 //-----------------------------------------------------------------------------
-void PhysicsBall (Ball* proba)
+void PhysicsBall (Ball* proba, double x, double widthX, int* score)
     {
     proba->x = proba->x + proba->vx * proba->dt;
     proba->y = proba->y + proba->vy * proba->dt;
@@ -161,28 +160,21 @@ void PhysicsBall (Ball* proba)
 
     if (proba->y >  txGetExtentY() - 80 - 20)
         {
-        proba->vy = -(proba->vy);
-        proba->y  = txGetExtentY() - 80 - 20;
-        txPlaySound ("Sounds/ball1.wav");
-        }
-
-    /*if (proba->y >  txGetExtentY() - 80 - 20)
-        {
-        switch (proba->x > *xTruck && proba->x < *xTruck + *widthX)
+        switch (proba->x > x && proba->x < x + widthX)
             {
             case true:
-                if (proba->x < *xTruck + *widthX/2)
+                if (proba->x < x + widthX/2)
                     {
-                    *vyBall = -(*vyBall);
-                    *vxBall = *vxBall + 0.1;
+                    proba->vy = -(proba->vy);
+                    proba->vx =   proba->vx + 0.1;
                     proba->y  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
                     txPlaySound ("Sounds/ball1.wav");
                     }
                 else
                     {
-                    *vyBall = -(*vyBall);
-                    *vxBall = *vxBall - 0.1;
+                    proba->vy = -(proba->vy);
+                    proba->vx =   proba->vx - 0.1;
                     proba->y  = txGetExtentY() - 80 - 20;
                     *score  = *score + 1;
                     txPlaySound ("Sounds/ball1.wav");
@@ -198,5 +190,5 @@ void PhysicsBall (Ball* proba)
                 break;
             }
 
-        } */
+        }
     }
